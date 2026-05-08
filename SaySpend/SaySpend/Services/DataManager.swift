@@ -6,6 +6,9 @@ final class DataManager {
     var useCloudKit: Bool = false {
         didSet {
             UserDefaults.standard.set(useCloudKit, forKey: "useCloudKit")
+            if useCloudKit {
+                migrateToCloudKit()
+            }
         }
     }
     
@@ -14,6 +17,9 @@ final class DataManager {
     }
     
     static let shared = DataManager()
+    
+    private func migrateToCloudKit() {
+    }
     
     func todayExpenses(modelContext: ModelContext) -> [Expense] {
         let calendar = Calendar.current

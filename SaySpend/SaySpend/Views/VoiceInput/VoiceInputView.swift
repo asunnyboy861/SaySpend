@@ -63,7 +63,7 @@ struct VoiceInputView: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                if let expense = parsedExpense {
+                if parsedExpense != nil {
                     ExpenseConfirmationCard(
                         amount: $confirmAmount,
                         category: $confirmCategory,

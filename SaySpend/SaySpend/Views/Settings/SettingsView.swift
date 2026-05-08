@@ -2,9 +2,12 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @AppStorage("useCloudKit") private var useCloudKit = false
     @State private var showPaywall = false
     @State private var showContact = false
+    @State private var showRestartAlert = false
+    @State private var pendingCloudKitValue = false
     @State private var purchaseManager = PurchaseManager.shared
     
     var body: some View {
@@ -34,7 +37,13 @@ struct SettingsView: View {
                 }
                 
                 Section("Sync") {
-                    Toggle("iCloud Sync", isOn: $useCloudKit)
+                    Toggle("iCloud Sync", isOn: Binding(
+                        get: { useCloudKit },
+                        set: { newValue in
+                            pendingCloudKitValue = newValue
+                            showRestartAlert = true
+                        }
+                    ))
                     Text("Sync your expenses across all devices")
                         .font(.caption)
                         .foregroundColor(.appTextSecondary)
@@ -95,6 +104,16 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showContact) {
                 ContactSupportView()
+            }
+            .alert("Restart Required", isPresented: $showRestartAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Restart") {
+                    useCloudKit = pendingCloudKitValue
+                    UserDefaults.standard.set(useCloudKit, forKey: "useCloudKit")
+                    exit(0)
+                }
+            } message: {
+                Text("Changing iCloud sync settings requires restarting the app. The app will restart to apply changes.")
             }
         }
     }
